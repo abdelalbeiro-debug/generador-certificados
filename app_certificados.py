@@ -138,8 +138,10 @@ if archivo:
                         file_name=f"Certificado_{fila['NIT']}.docx",
                         key=f"dl_{i}_{fila['NIT']}"
                     )
-    else:
-        st.error(f"Faltan columnas. El Excel debe tener: {req}")
+        else:
+        # 1. Asegúrese de que esto tenga espacios a la izquierda
+            st.error(f"Faltan columnas. El Excel debe tener: {req}")
 
-        st.markdown("---")
+# 2. Esto va pegado al borde izquierdo (SIN ESPACIOS)
+st.markdown("---")
 st.caption("🛠️ Desarrollado por **Abdel Areiza**")
