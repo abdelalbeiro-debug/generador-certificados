@@ -112,7 +112,7 @@ archivo = st.file_uploader("Sube tu Excel", type=["xlsx"])
 
 # 2. Si NO han subido nada, mostramos el mensaje azul de bienvenida
 if not archivo:
-    st.info("👋 ¡Hola Abdel! Por favor, sube tu archivo de Excel arriba para empezar a generar los certificados.")
+    st.info("👋 ¡Hola Mi cielo no olvides que te amo y ya casi nos casamos! Por favor, sube tu archivo de Excel arriba para empezar a generar los certificados.")
 
 # 3. Si YA subieron el archivo, procesamos todo una sola vez
 else:
