@@ -104,27 +104,43 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
 st.set_page_config(page_title="Generador Auditoría", layout="wide")
 st.title("📑 Generador de certificados PRO")
 
+# --- INTERFAZ ---
+st.set_page_config(page_title="Generador Auditoría", layout="wide")
+st.title("📑 Generador de certificados PRO")
+
+# 1. El cargador de archivos
 archivo = st.file_uploader("Sube tu Excel", type=["xlsx"])
 
-if archivo:
+# 2. Si NO han subido nada, mostramos el mensaje azul de bienvenida
+if not archivo:
+    st.info("👋 ¡Hola Abdel! Por favor, sube tu archivo de Excel arriba para empezar a generar los certificados.")
+
+# 3. Si YA subieron el archivo, procesamos todo una sola vez
+else:
     df = pd.read_excel(archivo)
     df.columns = df.columns.str.upper().str.strip()
     
+    # Lista de columnas obligatorias
     req = ['AÑO', 'NOMBRE CUENTA', 'TERCERO', 'NIT', 'VALOR EN LIBROS', 'TIPO']
     
+    # Verificamos si el Excel es el correcto
     if all(c in df.columns for c in req):
+        st.success("✅ ¡Base de datos cargada con éxito!")
+        
+        # Limpieza de datos (Asegúrate de que estas líneas tengan 8 espacios de sangría)
         df['NIT'] = df['NIT'].astype(str).str.replace(r'\.0$', '', regex=True).str.strip()
         df['VALOR EN LIBROS'] = df['VALOR EN LIBROS'].apply(limpiar_monto)
-        # Respeta el formato de su base de datos como pidió
         df['NOMBRE CUENTA'] = df['NOMBRE CUENTA'].astype(str).str.strip()
         df['TIPO'] = df['TIPO'].astype(str).str.strip()
         
+        # Lógica del certificado
         mapa_tipos = pd.Series(df.TIPO.values, index=df['NOMBRE CUENTA']).to_dict()
-        
         resumen = df.groupby(['AÑO', 'NIT', 'TERCERO', 'NOMBRE CUENTA'])['VALOR EN LIBROS'].sum().unstack(fill_value=0).reset_index()
         rubros = [c for c in resumen.columns if c not in ['AÑO', 'NIT', 'TERCERO']]
         
         resumen['ETIQUETA'] = resumen['TERCERO'] + " (" + resumen['NIT'] + ") - Año: " + resumen['AÑO'].astype(str)
+        
+        # Buscador de personas
         seleccionados = st.multiselect("Selecciona los certificados:", resumen['ETIQUETA'].unique())
         
         if seleccionados:
@@ -138,10 +154,10 @@ if archivo:
                         file_name=f"Certificado_{fila['NIT']}.docx",
                         key=f"dl_{i}_{fila['NIT']}"
                     )
-        else:
-        # 1. Asegúrese de que esto tenga espacios a la izquierda
-            st.error(f"Faltan columnas. El Excel debe tener: {req}")
+    else:
+        # Este error solo sale si el archivo está mal
+        st.error(f"⚠️ El Excel no tiene las columnas correctas. Necesito: {req}")
 
-# 2. Esto va pegado al borde izquierdo (SIN ESPACIOS)
+# 4. Los créditos (Pega esto al puro final, sin espacios a la izquierda)
 st.markdown("---")
 st.caption("🛠️ Desarrollado por **Abdel Areiza**")
