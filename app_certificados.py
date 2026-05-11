@@ -110,7 +110,7 @@ if archivo:
     df = pd.read_excel(archivo)
     df.columns = df.columns.str.upper().str.strip()
     
-    req = ['AÑO', 'CUENTA', 'NOMBRE CUENTA', 'TERCERO', 'NIT', 'VALOR EN LIBROS', 'TIPO']
+    req = ['AÑO', 'NOMBRE CUENTA', 'TERCERO', 'NIT', 'VALOR EN LIBROS', 'TIPO']
     
     if all(c in df.columns for c in req):
         df['NIT'] = df['NIT'].astype(str).str.replace(r'\.0$', '', regex=True).str.strip()
