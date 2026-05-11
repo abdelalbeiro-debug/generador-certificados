@@ -102,7 +102,6 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
 
 # --- INTERFAZ ---
 st.set_page_config(page_title="Generador Auditoría", layout="wide")
-st.title("📑 Generador de certificados PRO")
 
 # --- INTERFAZ ---
 st.set_page_config(page_title="Generador Auditoría", layout="wide")
