@@ -104,6 +104,19 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
 # 1. Configuración obligatoria (SOLO UNA VEZ)
 st.set_page_config(page_title="Generador Auditoría", layout="wide")
 
+with st.sidebar:
+    st.header("📌 Centro de Ayuda")
+    try:
+        with open("Manual_Usuario_Certificados_PRO.pdf", "rb") as f:
+            st.download_button(
+                label="📘 Descargar Manual de Usuario",
+                data=f,
+                file_name="Manual_Usuario_Certificados_PRO.pdf",
+                mime="application/pdf"
+            )
+    except FileNotFoundError:
+        st.warning("⚠️ Manual no disponible en el servidor.")
+        
 # 2. Diseño Personalizado (Fondo Slate y Header Azul)
 st.markdown("""
     <style>
