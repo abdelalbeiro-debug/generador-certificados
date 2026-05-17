@@ -101,15 +101,41 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
     return target
 
 # --- INTERFAZ ---
+# 1. Configuración obligatoria (SOLO UNA VEZ)
 st.set_page_config(page_title="Generador Auditoría", layout="wide")
 
-# --- INTERFAZ ---
-st.set_page_config(page_title="Generador Auditoría", layout="wide")
-st.title("📑 Generador de certificados PRO")
+# 2. Diseño Personalizado (Fondo Slate y Header Azul)
+st.markdown("""
+    <style>
+    /* Fondo Slate-100 */
+    .stApp { background-color: #f1f5f9; }
+    
+    /* Header Azul-900 */
+    header[data-testid="stHeader"] { background-color: #0f172a; }
+    
+    /* Título en el Header */
+    .main-title {
+        background-color: #0f172a; color: white; padding: 1.5rem;
+        border-radius: 0 0 1rem 1rem; margin-top: -3.5rem;
+        margin-bottom: 2rem; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
 
-# 1. El cargador de archivos
+    /* Tarjetas Blancas Redondeadas 2xl */
+    div[data-testid="stVerticalBlock"] > div:has(div.stMarkdown) {
+        background-color: white; padding: 2rem;
+        border-radius: 1.5rem; border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    </style>
+    
+    <div class="main-title">
+        <h1 style="margin:0; font-size: 1.8rem; font-family: Arial;">📑 Generador de Certificados Auditoría PRO</h1>
+    </div>
+""", unsafe_allow_html=True)
+
+# 3. El cargador de archivos (YA NO NECESITAS st.title AQUÍ)
 archivo = st.file_uploader("Sube tu Excel", type=["xlsx"])
-
 # 2. Si NO han subido nada, mostramos el mensaje azul de bienvenida
 if not archivo:
     st.info("👋 ¡Hola Colega! Por favor, sube tu archivo de Excel arriba para empezar a generar los certificados.")
