@@ -159,4 +159,4 @@ else:
 
 # 4. Los créditos (Pega esto al puro final, sin espacios a la izquierda)
 st.markdown("---")
-st.caption("🛠️ Desarrollado por **Abdel Areiza**")
+st.caption("🛠️ Desarrollado por **Especializacion en contabilidad y audoria en entornos digitales - 2026**")
