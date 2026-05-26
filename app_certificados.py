@@ -29,24 +29,18 @@ def limpiar_monto(valor):
 
 def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipos):
     doc = Document()
-    # --- PROPIEDADES DE AUTOR (ABDEL AREIZA) ---
     doc.core_properties.author = "Abdel Areiza"
-    doc.core_properties.title = f"Certificado de Auditoría - {nombre_t}"
-    doc.core_properties.comments = "Documento generado por el aplicativo de Abdel Areiza"
     
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Arial'
-    font.size = Pt(12)
+    font.size = Pt(11) # Bajamos un punto para que quepa todo el formulario
 
     # 1. Encabezado
     p1 = doc.add_paragraph()
     p1.alignment = 1
-    p1.add_run(f"{nombre_t}").bold = True
-    
-    p2 = doc.add_paragraph()
-    p2.alignment = 1
-    p2.add_run(f"NIT {nit_t}").bold = True
+    p1.add_run(f"{nombre_t}\n").bold = True
+    p1.add_run(f"NIT {nit_t}").bold = True
     
     doc.add_paragraph("\nCERTIFICA QUE\n").alignment = 1
     
@@ -62,35 +56,52 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
     
     doc.add_paragraph()
 
-    # 3. Listado Agrupado
-    categorias = {"De Activos": [], "De Pasivos": []}
-    for rubro in rubros_disponibles:
-        valor = float(fila_datos.get(rubro, 0))
-        if abs(valor) > 0.01:
-            tipo = mapa_tipos.get(rubro, "Otros")
-            if tipo not in categorias: categorias[tipo] = []
-            # Trae el rubro tal cual del Excel como pidió
-            categorias[tipo].append(f"{rubro}: $ {abs(valor):,.2f}")
+    # --- LISTA MAESTRA DE AUDITORÍA ---
+    maestro_activos = [
+        "Clientes Nacionales", "Clientes Nacionales Provisión", 
+        "Anticipos y avances entregados", "Aportes para futura suscripción Acciones",
+        "Obligaciones con particulares por cobrar", "Dividendos y/o participaciones",
+        "Cuentas por cobrar a socios y accionistas", "Otras cuentas por cobrar",
+        "Depósitos por cobrar"
+    ]
+    
+    maestro_pasivos = [
+        "Proveedores", "Depósitos recibidos por pagar",
+        "Préstamos a particulares por pagar", "Dineros recibidos por anticipado",
+        "Depósitos para acciones", "Cuentas por pagar a terceros",
+        "Otras cuentas por pagar", "Cuentas en participación por pagar"
+    ]
 
-    for nombre_cat in ["De Activos", "De Pasivos"]:
-        lineas = categorias.get(nombre_cat, [])
-        if lineas:
-            p_cat = doc.add_paragraph()
-            p_cat.add_run(f"{nombre_cat}:").bold = True
-            # Quitamos espacio después del título de la categoría
-            p_cat.paragraph_format.space_after = Pt(0) 
+    # 3. Generar Secciones
+    for titulo, lista_maestra in [("De Activos", maestro_activos), ("De Pasivos", maestro_pasivos)]:
+        p_tit = doc.add_paragraph()
+        p_tit.add_run(f"{titulo}:").bold = True
+        p_tit.paragraph_format.space_after = Pt(0)
+        
+        for rubro in lista_maestra:
+            # Buscamos si el rubro existe en los datos del Excel
+            valor = fila_datos.get(rubro, 0)
             
-            for linea in lineas:
-                p_item = doc.add_paragraph(linea)
-                # --- AQUÍ QUITAMOS EL INTERLINEADO ---
-                p_item.paragraph_format.space_after = Pt(0) # Espacio cero después
-                p_item.paragraph_format.line_spacing = 1.0  # Interlineado sencillo
+            p_item = doc.add_paragraph()
+            p_item.paragraph_format.space_after = Pt(0)
+            p_item.paragraph_format.line_spacing = 1.0
             
-            # Espacio pequeño al final de cada grupo para que no se pegue con el siguiente título
-            doc.add_paragraph().paragraph_format.space_after = Pt(0)
+            # Formateo: Nombre del rubro + Espacios + Valor o Línea
+            if abs(valor) > 0.01:
+                texto_valor = f"$ {abs(valor):,.2f}"
+            else:
+                texto_valor = "$ ________________"
+            
+            # Usamos tabulaciones o espacios para alinear (Ajuste visual)
+            # Nota: En Word profesional es mejor usar tabuladores, aquí simulamos alineación
+            p_item.add_run(f"{rubro}:").bold = False
+            # Añadimos un espacio flexible (esto se puede mejorar con tabs en Word)
+            p_item.add_run(f" {texto_valor}").bold = False
+
+        doc.add_paragraph().paragraph_format.space_after = Pt(0)
 
     # 4. Firma
-    doc.add_paragraph(f"\nEsta certificación se expide el día 7 de mayo de 2026.")
+    doc.add_paragraph(f"\nEsta certificación se expide el día 10 de febrero de 2026.")
     p_firma = doc.add_paragraph("\nAtentamente\n\nNombre: ______________________\n")
     p_firma.add_run("Firma: _______________\n")
     p_firma.add_run("Contador Público\n")
