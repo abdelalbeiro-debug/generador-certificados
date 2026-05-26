@@ -42,7 +42,10 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
     p1.add_run(f"{nombre_t}\n").bold = True
     p1.add_run(f"NIT {nit_t}").bold = True
     
-    doc.add_paragraph("\nCERTIFICA QUE\n").alignment = 1
+    # Párrafo de Certificación con Negrita
+    p_certifica = doc.add_paragraph()
+    p_certifica.alignment = 1
+    p_certifica.add_run("\nCERTIFICA QUE\n").bold = True
     
     # 2. Cuerpo
     p3 = doc.add_paragraph()
