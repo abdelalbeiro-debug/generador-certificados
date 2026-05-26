@@ -10,6 +10,7 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 import re
+import zipfile
 from docx.shared import Pt
 
 def limpiar_monto(valor):
@@ -179,23 +180,45 @@ else:
         resumen['ETIQUETA'] = resumen['TERCERO'] + " (" + resumen['NIT'] + ") - Año: " + resumen['AÑO'].astype(str)
         
         # Buscador de personas
+# Buscador de personas
         seleccionados = st.multiselect("Selecciona los certificados:", resumen['ETIQUETA'].unique())
         
         if seleccionados:
             if st.button("🚀 Preparar Descargas"):
-                for i, sel in enumerate(seleccionados):
-                    fila = resumen[resumen['ETIQUETA'] == sel].iloc[0]
-                    doc_final = crear_word(fila, fila['TERCERO'], fila['NIT'], fila['AÑO'], rubros, mapa_tipos)
-                    st.download_button(
-                        label=f"📥 Descargar: {sel}",
-                        data=doc_final.getvalue(),
-                        file_name=f"Certificado_{fila['NIT']}.docx",
-                        key=f"dl_{i}_{fila['NIT']}"
-                    )
+                # --- NUEVA LÓGICA PARA EL ARCHIVO ZIP ---
+                zip_buffer = BytesIO()
+                
+                with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED) as zip_file:
+                    for i, sel in enumerate(seleccionados):
+                        fila = resumen[resumen['ETIQUETA'] == sel].iloc[0]
+                        doc_final = crear_word(fila, fila['TERCERO'], fila['NIT'], fila['AÑO'], rubros, mapa_tipos)
+                        
+                        nombre_archivo = f"Certificado_{fila['NIT']}_{fila['AÑO']}.docx"
+                        # Guardamos cada certificado dentro del paquete ZIP
+                        zip_file.writestr(nombre_archivo, doc_final.getvalue())
+                        
+                        # Mantenemos los botones individuales abajo por si acaso
+                        st.download_button(
+                            label=f"📥 Descargar: {sel}",
+                            data=doc_final.getvalue(),
+                            file_name=nombre_archivo,
+                            key=f"dl_{i}_{fila['NIT']}"
+                        )
+                
+                # --- BOTÓN DE DESCARGA TODO EN UNO ---
+                st.markdown("---")
+                st.success("🎉 ¡Todos los certificados están listos!")
+                st.download_button(
+                    label="🎁 DESCARGAR TODO EL LOTE (.ZIP)",
+                    data=zip_buffer.getvalue(),
+                    file_name="Lote_Certificados_Auditoria.zip",
+                    mime="application/zip",
+                    use_container_width=True
+                )
     else:
         # Este error solo sale si el archivo está mal
         st.error(f"⚠️ El Excel no tiene las columnas correctas. Necesito: {req}")
 
-# 4. Los créditos (Pega esto al puro final, sin espacios a la izquierda)
+# 4. Los créditos (Al puro final, sin espacios a la izquierda)
 st.markdown("---")
 st.caption("🛠️ Desarrollado por **Especializacion en contabilidad y audoria en entornos digitales - 2026**")
