@@ -104,7 +104,7 @@ def crear_word(fila_datos, nombre_t, nit_t, ano_t, rubros_disponibles, mapa_tipo
         doc.add_paragraph().paragraph_format.space_after = Pt(0)
 
     # 4. Firma
-    doc.add_paragraph(f"\nEsta certificación se expide el día 26 de mayo de 2026.")
+    doc.add_paragraph(f"\nEsta certificación se expide el día 1 de junio de 2026.")
     p_firma = doc.add_paragraph("\nAtentamente\n\nNombre: ______________________\n")
     p_firma.add_run("Firma: _______________\n")
     p_firma.add_run("Contador Público\n")
