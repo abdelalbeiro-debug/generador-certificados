@@ -193,19 +193,23 @@ else:
         
         resumen['ETIQUETA'] = resumen['TERCERO'] + " (" + resumen['NIT'] + ") - Año: " + resumen['AÑO'].astype(str)
         
-# --- BUSCADOR DE PERSONAS MEJORADO (FILTRO INTELIGENTE) ---
+# --- BUSCADOR DE PERSONAS CON FILTRO DINÁMICO ---
         opciones_disponibles = list(resumen['ETIQUETA'].unique())
-        
-        # 1. Colocamos un interruptor arriba del buscador
-        seleccionar_todos_activado = st.checkbox("✅ Marcar todos los registros encontrados en la lista")
 
-        # 2. Lógica del buscador
-        if seleccionar_todos_activado:
-            # Si el checkbox está marcado, el multiselect inicia con todo seleccionado por defecto
-            seleccionados = st.multiselect("Selecciona los certificados:", opciones_disponibles, default=opciones_disponibles)
+        # 1. Caja de texto para filtrar (esto es lo que escribes en la barra)
+        filtro_texto = st.text_input("🔍 Buscar tercero (Nombre o NIT):", "").upper()
+
+        # 2. Filtramos la lista internamente
+        opciones_filtradas = [opt for opt in opciones_disponibles if filtro_texto in opt]
+
+        # 3. Checkbox que solo afecta a lo que encontraste
+        seleccionar_visibles = st.checkbox(f"✅ Seleccionar los {len(opciones_filtradas)} registros encontrados")
+
+        if seleccionar_visibles:
+            seleccionados = st.multiselect("Confirmar selección:", opciones_filtradas, default=opciones_filtradas)
         else:
-            seleccionados = st.multiselect("Selecciona los certificados:", opciones_disponibles)
-        
+            seleccionados = st.multiselect("Selecciona de la lista:", opciones_filtradas)
+
         # 3. Procesamiento y generación de archivos
         if seleccionados:
             if st.button("🚀 Preparar Descargas"):
