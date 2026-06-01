@@ -193,9 +193,17 @@ else:
         
         resumen['ETIQUETA'] = resumen['TERCERO'] + " (" + resumen['NIT'] + ") - Año: " + resumen['AÑO'].astype(str)
         
-        # Buscador de personas
-# Buscador de personas
-        seleccionados = st.multiselect("Selecciona los certificados:", resumen['ETIQUETA'].unique())
+# --- BUSCADOR DE PERSONAS CON OPCIÓN "SELECCIONAR TODO" ---
+        opciones_disponibles = list(resumen['ETIQUETA'].unique())
+        opciones_con_comando = ["✅ SELECCIONAR TODO"] + opciones_disponibles
+        
+        seleccion_input = st.multiselect("Selecciona los certificados:", opciones_con_comando)
+        
+        # Lógica para procesar la selección
+        if "✅ SELECCIONAR TODO" in seleccion_input:
+            seleccionados = opciones_disponibles
+        else:
+            seleccionados = seleccion_input
         
         if seleccionados:
             if st.button("🚀 Preparar Descargas"):
@@ -204,14 +212,14 @@ else:
                 
                 with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED) as zip_file:
                     for i, sel in enumerate(seleccionados):
+                        # Obtenemos los datos de la fila ignorando el texto de comando
                         fila = resumen[resumen['ETIQUETA'] == sel].iloc[0]
                         doc_final = crear_word(fila, fila['TERCERO'], fila['NIT'], fila['AÑO'], rubros, mapa_tipos)
                         
                         nombre_archivo = f"Certificado_{fila['NIT']}_{fila['AÑO']}.docx"
-                        # Guardamos cada certificado dentro del paquete ZIP
                         zip_file.writestr(nombre_archivo, doc_final.getvalue())
                         
-                        # Mantenemos los botones individuales abajo por si acaso
+                        # Botones individuales (se mantienen para control)
                         st.download_button(
                             label=f"📥 Descargar: {sel}",
                             data=doc_final.getvalue(),
@@ -221,7 +229,7 @@ else:
                 
                 # --- BOTÓN DE DESCARGA TODO EN UNO ---
                 st.markdown("---")
-                st.success("🎉 ¡Todos los certificados están listos!")
+                st.success(f"🎉 ¡{len(seleccionados)} certificados listos para descargar!")
                 st.download_button(
                     label="🎁 DESCARGAR TODO EL LOTE (.ZIP)",
                     data=zip_buffer.getvalue(),
