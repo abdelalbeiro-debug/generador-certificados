@@ -193,33 +193,34 @@ else:
         
         resumen['ETIQUETA'] = resumen['TERCERO'] + " (" + resumen['NIT'] + ") - Año: " + resumen['AÑO'].astype(str)
         
-# --- BUSCADOR DE PERSONAS CON OPCIÓN "SELECCIONAR TODO" ---
+# --- BUSCADOR DE PERSONAS MEJORADO (FILTRO INTELIGENTE) ---
         opciones_disponibles = list(resumen['ETIQUETA'].unique())
-        opciones_con_comando = ["✅ SELECCIONAR TODO"] + opciones_disponibles
         
-        seleccion_input = st.multiselect("Selecciona los certificados:", opciones_con_comando)
-        
-        # Lógica para procesar la selección
-        if "✅ SELECCIONAR TODO" in seleccion_input:
-            seleccionados = opciones_disponibles
+        # 1. Colocamos un interruptor arriba del buscador
+        seleccionar_todos_activado = st.checkbox("✅ Marcar todos los registros encontrados en la lista")
+
+        # 2. Lógica del buscador
+        if seleccionar_todos_activado:
+            # Si el checkbox está marcado, el multiselect inicia con todo seleccionado por defecto
+            seleccionados = st.multiselect("Selecciona los certificados:", opciones_disponibles, default=opciones_disponibles)
         else:
-            seleccionados = seleccion_input
+            seleccionados = st.multiselect("Selecciona los certificados:", opciones_disponibles)
         
+        # 3. Procesamiento y generación de archivos
         if seleccionados:
             if st.button("🚀 Preparar Descargas"):
-                # --- NUEVA LÓGICA PARA EL ARCHIVO ZIP ---
                 zip_buffer = BytesIO()
                 
                 with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED) as zip_file:
                     for i, sel in enumerate(seleccionados):
-                        # Obtenemos los datos de la fila ignorando el texto de comando
+                        # Buscamos los datos exactos del tercero seleccionado
                         fila = resumen[resumen['ETIQUETA'] == sel].iloc[0]
                         doc_final = crear_word(fila, fila['TERCERO'], fila['NIT'], fila['AÑO'], rubros, mapa_tipos)
                         
                         nombre_archivo = f"Certificado_{fila['NIT']}_{fila['AÑO']}.docx"
                         zip_file.writestr(nombre_archivo, doc_final.getvalue())
                         
-                        # Botones individuales (se mantienen para control)
+                        # Botones individuales
                         st.download_button(
                             label=f"📥 Descargar: {sel}",
                             data=doc_final.getvalue(),
@@ -227,7 +228,6 @@ else:
                             key=f"dl_{i}_{fila['NIT']}"
                         )
                 
-                # --- BOTÓN DE DESCARGA TODO EN UNO ---
                 st.markdown("---")
                 st.success(f"🎉 ¡{len(seleccionados)} certificados listos para descargar!")
                 st.download_button(
@@ -238,9 +238,9 @@ else:
                     use_container_width=True
                 )
     else:
-        # Este error solo sale si el archivo está mal
+        # Error si las columnas del Excel no coinciden
         st.error(f"⚠️ El Excel no tiene las columnas correctas. Necesito: {req}")
 
 # 4. Los créditos (Al puro final, sin espacios a la izquierda)
 st.markdown("---")
-st.caption("🛠️ Desarrollado por **Especializacion en contabilidad y audoria en entornos digitales - 2026**")
+st.caption("🛠️ Desarrollado por **Abdel Areiza**")
